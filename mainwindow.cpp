@@ -1,4 +1,3 @@
-#include "iso646.h"
 #include<fstream>
 #include<QFileDialog>
 #include "mainwindow.h"
@@ -20,9 +19,9 @@ using namespace std::literals::string_literals; // allow suffix ""s for std::str
 MainWindow::MainWindow(QWidget* parent)	: 
 	QMainWindow(parent),
     //flow_sheet_graph_tab(sim_objects, configuration),
-    copyAction("Copy to clipboard"),
-    not_yet_implemented("<not yet implemented>"),
-    unit_tab(sim_objects),
+    copyAction(),
+    not_yet_implemented(),
+    unit_tab(new Unit_Tab(sim_objects)),
     main_tab(),
     cvtm(sim_objects)
 {
@@ -38,77 +37,81 @@ MainWindow::MainWindow(QWidget* parent)	:
 
 		Streams tab
 	 */
-	main_window_horizontal_split.addWidget(&sim_object_selector_group);
-	main_window_horizontal_split.addWidget(&eval_functional_model);
-	main_window_horizontal_split.addWidget(&main_tab);
 
-	main_tab.setFocusPolicy(Qt::NoFocus);
+    main_window_horizontal_split = new QVBoxLayout();
+    sim_object_selector_group = new QGroupBox();
+    eval_functional_model = new QPushButton();
+    main_window_horizontal_split->addWidget(sim_object_selector_group);
+    main_window_horizontal_split->addWidget(eval_functional_model);
+    main_window_horizontal_split->addWidget(main_tab);
 
-	main_window_group.setLayout(&main_window_horizontal_split);
+    main_tab->setFocusPolicy(Qt::NoFocus);
+
+    main_window_group->setLayout(main_window_horizontal_split);
 
 	for (int i = 0; i < NSimObjects; ++i)
 	{
-		select_new_simobject[i].setText(("Select SimObject #"s + std::to_string(1 + i)).c_str());
-		sim_object_selector_subgroup[i].setLayout(&sim_object_selector_layout_group[i]);
+        select_new_simobject[i]->setText(("Select SimObject #"s + std::to_string(1 + i)).c_str());
+        sim_object_selector_subgroup[i]->setLayout(sim_object_selector_layout_group[i]);
 
 		//sim_object_selector_layout.addWidget(&drop_label);
 
-		select_new_simobject[i].setSizePolicy(QSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed));
+        select_new_simobject[i]->setSizePolicy(QSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed));
 
-		sim_object_selector_layout_group[i].addWidget(&select_new_simobject[i]);
+        sim_object_selector_layout_group[i]->addWidget(select_new_simobject[i]);
 
-		sim_object_selector_layout_group[i].addWidget(&simobj_fname[i]);
+        sim_object_selector_layout_group[i]->addWidget(simobj_fname[i]);
 
-		sim_object_selector_layout.addWidget(&sim_object_selector_subgroup[i]);
+        sim_object_selector_layout->addWidget(sim_object_selector_subgroup[i]);
 	}
-	sim_object_selector_group.setLayout(&sim_object_selector_layout);
+    sim_object_selector_group->setLayout(sim_object_selector_layout);
 
-	eval_functional_model.setText("Execute cli tool");
+    eval_functional_model->setText("Execute cli tool");
 
 	// "Streams" Tab
 
 	// Stream Selector is simple list
-	connector_form_layout_.addWidget(&StreamListSelector, 5);
-	Connector_form_group.setSizePolicy(QSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding));
+    connector_form_layout_->addWidget(StreamListSelector, 5);
+    Connector_form_group->setSizePolicy(QSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding));
 
 	// Connector tab is more complex
-    connector_form_layout_.addWidget(&connector_form_values);
-    connector_form_values_layout.addWidget(&copyAction);
+    connector_form_layout_->addWidget(connector_form_values);
+    connector_form_values_layout->addWidget(copyAction);
 
-	Connector_form_group.setLayout(&connector_form_layout_);
+    Connector_form_group->setLayout(connector_form_layout_);
 
-	StreamListSelector.setSizePolicy(QSizePolicy(QSizePolicy::Fixed, QSizePolicy::MinimumExpanding));
+    StreamListSelector->setSizePolicy(QSizePolicy(QSizePolicy::Fixed, QSizePolicy::MinimumExpanding));
 
-	auto success = connect(&StreamListSelector, SIGNAL(itemClicked(QListWidgetItem*)), this, SLOT(setListItem(QListWidgetItem*)));
+    auto success = connect(StreamListSelector, SIGNAL(itemClicked(QListWidgetItem*)), this, SLOT(setListItem(QListWidgetItem*)));
 	assert(success);
-	success = connect(&eval_functional_model, SIGNAL(clicked()), this, SLOT(exec_generic_cli_tool()));
+    success = connect(eval_functional_model, SIGNAL(clicked()), this, SLOT(exec_generic_cli_tool()));
 	assert(success);
 
-	success = connect(&select_new_simobject[0], SIGNAL(clicked()), this, SLOT(selectSimObjectFile1()));
+    success = connect(select_new_simobject[0], SIGNAL(clicked()), this, SLOT(selectSimObjectFile1()));
 	assert(success);
-	success = connect(&select_new_simobject[1], SIGNAL(clicked()), this, SLOT(selectSimObjectFile2()));
+    success = connect(select_new_simobject[1], SIGNAL(clicked()), this, SLOT(selectSimObjectFile2()));
 	assert(success);
-	success = connect(&select_new_simobject[2], SIGNAL(clicked()), this, SLOT(selectSimObjectFile3()));
+    success = connect(select_new_simobject[2], SIGNAL(clicked()), this, SLOT(selectSimObjectFile3()));
 	assert(success);
 
 
     // Connect the triggered signal of the copy action to a slot
-    success = connect(&copyAction, SIGNAL(clicked()), this, SLOT(copyToClipboard()));
+    success = connect(copyAction, SIGNAL(clicked()), this, SLOT(copyToClipboard()));
     assert(success);
 
-	connector_value_table.setModel(&cvtm);
-	connector_value_table.setEditTriggers(QAbstractItemView::NoEditTriggers);
-    connector_value_table.setSelectionMode(QAbstractItemView::ExtendedSelection);
+    connector_value_table->setModel(&cvtm);
+    connector_value_table->setEditTriggers(QAbstractItemView::NoEditTriggers);
+    connector_value_table->setSelectionMode(QAbstractItemView::ExtendedSelection);
 	cvtm.setHeaderData(0, Qt::Horizontal, "Values");
 
 	//connector_form_layout.addWidget(&select_new_simobject);
-	connector_form_values_layout.addWidget(&connector_value_table);
-	connector_form_values.setSizePolicy(QSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding));
+    connector_form_values_layout->addWidget(connector_value_table);
+    connector_form_values->setSizePolicy(QSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding));
 
-	connector_form_values.setLayout(&connector_form_values_layout);
+    connector_form_values->setLayout(connector_form_values_layout);
 
-	main_tab.addTab(&Connector_form_group, "Streams");
-    main_tab.addTab(&unit_form, "Units");
+    main_tab->addTab(Connector_form_group, "Streams");
+    main_tab->addTab(unit_form, "Units");
     //main_tab.addTab(&flow_sheet_graph_tab, "Graph");
 
 	generic_cli_tool_factory();
@@ -118,10 +121,10 @@ MainWindow::MainWindow(QWidget* parent)	:
     main_tab.addTab(&eval_functional_model_net_tab, "SMILE Web API");
 #endif
 
-	unit_form_layout.addWidget(&unit_tab);
-	unit_form.setLayout(&unit_form_layout);
+    unit_form_layout->addWidget(unit_tab);
+    unit_form->setLayout(unit_form_layout);
 
-	setCentralWidget(&main_window_group);
+    setCentralWidget(main_window_group);
 }
 
 /*
@@ -143,11 +146,11 @@ bool MainWindow::readSimObject(int i, std::string fname)
 		}
 		auto  new_sim_obj = nlohmann::json::parse(sim_obj_file);
 
-		remove_all_entries_QListWidget(StreamListSelector);
+        remove_all_entries_QListWidget(*StreamListSelector);
 
 		for (const auto& [stream_uuid,stream] : new_sim_obj.at("Connectors"s).get<nlohmann::json::object_t>())
 		{
-			StreamListSelector.addItem(get_unique_connector_name(new_sim_obj,stream_uuid).c_str());
+            StreamListSelector->addItem(get_unique_connector_name(new_sim_obj,stream_uuid).c_str());
 		}
 
 		if (sim_objects.size() < i)
@@ -156,9 +159,9 @@ bool MainWindow::readSimObject(int i, std::string fname)
 		}
 		sim_objects.back().sim_object_filename = fname;
 		sim_objects.back().sim_object = new_sim_obj;
-		simobj_fname[i - 1].setText(sim_objects.back().sim_object_filename.c_str());
+        simobj_fname[i - 1]->setText(sim_objects.back().sim_object_filename.c_str());
 
-		unit_tab.update();
+        unit_tab->update();
 
 
         if(i==1)
@@ -224,8 +227,8 @@ void MainWindow::update_connector_form_values()
 		}
 	}
 	cvtm.layoutChanged();
-	connector_value_table.resizeRowsToContents();
-	connector_value_table.setItemDelegateForColumn(1, &cvtm.delegate);
+    connector_value_table->resizeRowsToContents();
+    connector_value_table->setItemDelegateForColumn(1, &cvtm.delegate);
 }
 
 void message(std::string message, QMessageBox::Icon icon)
@@ -289,12 +292,12 @@ void MainWindow::exec_generic_cli_tool()
 	}
 
 	// Get the index of the active tab  
-	int activeTabIndex = main_tab.currentIndex();
+    int activeTabIndex = main_tab->currentIndex();
 	// Get the label of the active tab  
-	QString activeTabLabel = main_tab.tabText(activeTabIndex);
+    QString activeTabLabel = main_tab->tabText(activeTabIndex);
 
 	// Use the label to do something with the active tab  
-	QWidget* activeTabWidget = main_tab.widget(activeTabIndex);
+    QWidget* activeTabWidget = main_tab->widget(activeTabIndex);
 
 	auto gen_cli_tool = dynamic_cast<Generic_cli_tool*>(activeTabWidget);
 
@@ -317,7 +320,7 @@ void MainWindow::exec_generic_cli_tool()
 
 void MainWindow::copyToClipboard()
 {
-    QItemSelectionModel* selection = connector_value_table.selectionModel();
+    QItemSelectionModel* selection = connector_value_table->selectionModel();
 	QModelIndexList selectedRows = selection->selectedRows();
 	QModelIndexList selectedColumns = selection->selectedColumns();
 
@@ -331,8 +334,8 @@ void MainWindow::copyToClipboard()
         for (int j = 0; j < sim_objects.size(); j++)
 		{
             //QModelIndex index = connector_value_table.model()->index(selectedRows.at(i).row(), selectedColumns.at(j).column());
-            QModelIndex index = connector_value_table.model()->index(selectedRows.at(i).row(), j);
-            QString data = connector_value_table.model()->data(index).toString();
+            QModelIndex index = connector_value_table->model()->index(selectedRows.at(i).row(), j);
+            QString data = connector_value_table->model()->data(index).toString();
 
 			copiedData += data;
 
