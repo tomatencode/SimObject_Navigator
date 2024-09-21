@@ -18,7 +18,7 @@ QVariant Connector_value_table_model::data(const QModelIndex &index, int role) c
         }
         else
         {
-            return QVariant();  
+            return QVariant();
         }
     }
     else

@@ -24,8 +24,6 @@ MainWindow::MainWindow(QWidget* parent)	:
     main_tab(),
     cvtm(sim_objects)
 {
-    flow_sheet_graph_tab = new Flow_Sheet_Graph(sim_objects, configuration,this);
-
 	read_config_file();
 	/*
 		Main Windows
@@ -84,26 +82,25 @@ MainWindow::MainWindow(QWidget* parent)	:
 	// "Streams" Tab
 
 	// Stream Selector is simple list
-    connector_form_layout_ = new QHBoxLayout(this);
-    StreamListSelector = new QListWidget(this);
-    connector_form_layout_->addWidget(StreamListSelector, 5);
-
-    Connector_form_group = new QGroupBox(this);
-
+    Connector_form_group = new QGroupBox(main_tab);
     Connector_form_group->setSizePolicy(QSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding));
 
-    connector_form_values = new QGroupBox(this);
-    connector_form_layout_ = new QHBoxLayout(this);
-	// Connector tab is more complex    
+    connector_form_layout_ = new QHBoxLayout(Connector_form_group);
+
+    StreamListSelector = new QListWidget(Connector_form_group);
+    StreamListSelector->setSizePolicy(QSizePolicy(QSizePolicy::Fixed, QSizePolicy::MinimumExpanding));
+    connector_form_layout_->addWidget(StreamListSelector, 5);
+
+    connector_form_values = new QGroupBox(Connector_form_group);
     connector_form_layout_->addWidget(connector_form_values);
 
-    connector_form_values_layout = new QVBoxLayout(this);
-    copyAction = new QPushButton(this);
+    connector_form_values_layout = new QVBoxLayout(connector_form_values);
+    copyAction = new QPushButton(connector_form_values);
+    copyAction->setText("copy");
     connector_form_values_layout->addWidget(copyAction);
 
     Connector_form_group->setLayout(connector_form_layout_);
 
-    StreamListSelector->setSizePolicy(QSizePolicy(QSizePolicy::Fixed, QSizePolicy::MinimumExpanding));
 
     auto success = connect(StreamListSelector, SIGNAL(itemClicked(QListWidgetItem*)), this, SLOT(setListItem(QListWidgetItem*)));
 	assert(success);
@@ -117,29 +114,30 @@ MainWindow::MainWindow(QWidget* parent)	:
     success = connect(select_new_simobject[2], SIGNAL(clicked()), this, SLOT(selectSimObjectFile3()));
 	assert(success);
 
-
     // Connect the triggered signal of the copy action to a slot
     success = connect(copyAction, &QPushButton::clicked, this, &::MainWindow::copyToClipboard);
     assert(success);
 
-    connector_value_table = new QTableView(this);
+    connector_value_table = new QTableView(main_tab);
 
     connector_value_table->setModel(&cvtm);
     connector_value_table->setEditTriggers(QAbstractItemView::NoEditTriggers);
     connector_value_table->setSelectionMode(QAbstractItemView::ExtendedSelection);
 	cvtm.setHeaderData(0, Qt::Horizontal, "Values");
 
-	//connector_form_layout.addWidget(&select_new_simobject);
+    //connector_form_layout_->addWidget(select_new_simobject);
     connector_form_values_layout->addWidget(connector_value_table);
     connector_form_values->setSizePolicy(QSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding));
 
     connector_form_values->setLayout(connector_form_values_layout);
 
-    unit_form = new QGroupBox(this);
+    unit_form = new QGroupBox(main_tab);
+
+    flow_sheet_graph_tab = new Flow_Sheet_Graph(sim_objects, configuration, main_tab);
 
     main_tab->addTab(Connector_form_group, "Streams");
     main_tab->addTab(unit_form, "Units");
-    //main_tab.addTab(&flow_sheet_graph_tab, "Graph");
+    main_tab->addTab(flow_sheet_graph_tab, "Graph");
 
 	generic_cli_tool_factory();
 
