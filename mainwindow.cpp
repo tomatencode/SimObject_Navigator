@@ -18,13 +18,14 @@ using namespace std::literals::string_literals; // allow suffix ""s for std::str
 
 MainWindow::MainWindow(QWidget* parent)	: 
 	QMainWindow(parent),
-    //flow_sheet_graph_tab(sim_objects, configuration),
     copyAction(),
     not_yet_implemented(),
     unit_tab(new Unit_Tab(sim_objects)),
     main_tab(),
     cvtm(sim_objects)
 {
+    flow_sheet_graph_tab = new Flow_Sheet_Graph(sim_objects, configuration,this);
+
 	read_config_file();
 	/*
 		Main Windows
@@ -38,30 +39,31 @@ MainWindow::MainWindow(QWidget* parent)	:
 		Streams tab
 	 */
 
-    main_window_horizontal_split = new QVBoxLayout();
-    sim_object_selector_group = new QGroupBox();
-    eval_functional_model = new QPushButton();
+
+    main_tab = new QTabWidget(this);
+    main_window_group = new QGroupBox(this);
+    main_window_horizontal_split = new QVBoxLayout(this);
+    sim_object_selector_group = new QGroupBox(main_window_group);
+    eval_functional_model = new QPushButton(main_window_group);
     main_window_horizontal_split->addWidget(sim_object_selector_group);
     main_window_horizontal_split->addWidget(eval_functional_model);
     main_window_horizontal_split->addWidget(main_tab);
 
-    main_tab = new Main_Tab();
-
     main_tab->setFocusPolicy(Qt::NoFocus);
 
-    main_window_horizontal_split = new QVBoxLayout();
-    main_window_group = new QGroupBox();
 
     main_window_group->setLayout(main_window_horizontal_split);
 
 	for (int i = 0; i < NSimObjects; ++i)
 	{
-        select_new_simobject[i] = new QPushButton();
-        select_new_simobject[i]->setText(("Select SimObject #"s + std::to_string(1 + i)).c_str());
-        sim_object_selector_subgroup[i] = new QGroupBox();
-        sim_object_selector_layout_group[i] = new QHBoxLayout();
+        sim_object_selector_subgroup[i] = new QGroupBox(sim_object_selector_group);
 
+        sim_object_selector_layout_group[i] = new QHBoxLayout(sim_object_selector_group);
         sim_object_selector_subgroup[i]->setLayout(sim_object_selector_layout_group[i]);
+
+        select_new_simobject[i] = new QPushButton(sim_object_selector_subgroup[i]);
+        select_new_simobject[i]->setText(("Select SimObject #"s + std::to_string(1 + i)).c_str());
+
 
 		//sim_object_selector_layout.addWidget(&drop_label);
 
@@ -69,12 +71,10 @@ MainWindow::MainWindow(QWidget* parent)	:
 
         sim_object_selector_layout_group[i]->addWidget(select_new_simobject[i]);
 
-        simobj_fname[i] = new QLabel();
+        simobj_fname[i] = new QLabel(sim_object_selector_subgroup[i]);
 
         sim_object_selector_layout_group[i]->addWidget(simobj_fname[i]);
-
-        sim_object_selector_subgroup[i] = new QGroupBox();
-        sim_object_selector_layout = new QVBoxLayout();
+        sim_object_selector_layout = new QVBoxLayout(sim_object_selector_group);
         sim_object_selector_layout->addWidget(sim_object_selector_subgroup[i]);
 	}
     sim_object_selector_group->setLayout(sim_object_selector_layout);
@@ -84,21 +84,21 @@ MainWindow::MainWindow(QWidget* parent)	:
 	// "Streams" Tab
 
 	// Stream Selector is simple list
-    connector_form_layout_ = new QHBoxLayout();
-    StreamListSelector = new QListWidget();
+    connector_form_layout_ = new QHBoxLayout(this);
+    StreamListSelector = new QListWidget(this);
     connector_form_layout_->addWidget(StreamListSelector, 5);
 
-    Connector_form_group = new QGroupBox();
+    Connector_form_group = new QGroupBox(this);
 
     Connector_form_group->setSizePolicy(QSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding));
 
-    connector_form_values = new QGroupBox();
-    connector_form_layout_ = new QHBoxLayout();
+    connector_form_values = new QGroupBox(this);
+    connector_form_layout_ = new QHBoxLayout(this);
 	// Connector tab is more complex    
     connector_form_layout_->addWidget(connector_form_values);
 
-    connector_form_values_layout = new QVBoxLayout();
-
+    connector_form_values_layout = new QVBoxLayout(this);
+    copyAction = new QPushButton(this);
     connector_form_values_layout->addWidget(copyAction);
 
     Connector_form_group->setLayout(connector_form_layout_);
@@ -119,8 +119,10 @@ MainWindow::MainWindow(QWidget* parent)	:
 
 
     // Connect the triggered signal of the copy action to a slot
-    success = connect(copyAction, SIGNAL(clicked()), this, SLOT(copyToClipboard()));
+    success = connect(copyAction, &QPushButton::clicked, this, &::MainWindow::copyToClipboard);
     assert(success);
+
+    connector_value_table = new QTableView(this);
 
     connector_value_table->setModel(&cvtm);
     connector_value_table->setEditTriggers(QAbstractItemView::NoEditTriggers);
@@ -133,6 +135,8 @@ MainWindow::MainWindow(QWidget* parent)	:
 
     connector_form_values->setLayout(connector_form_values_layout);
 
+    unit_form = new QGroupBox(this);
+
     main_tab->addTab(Connector_form_group, "Streams");
     main_tab->addTab(unit_form, "Units");
     //main_tab.addTab(&flow_sheet_graph_tab, "Graph");
@@ -144,6 +148,7 @@ MainWindow::MainWindow(QWidget* parent)	:
     main_tab.addTab(&eval_functional_model_net_tab, "SMILE Web API");
 #endif
 
+    unit_form_layout = new QVBoxLayout(this);
     unit_form_layout->addWidget(unit_tab);
     unit_form->setLayout(unit_form_layout);
 

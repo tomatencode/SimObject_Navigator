@@ -1,7 +1,6 @@
 #include <iostream>
 #include <fstream>
 #include<set>
-#include<QTCore>
 #include "Flow_sheet_graph.hpp"
 #include "message.hpp"
 #include "utilities.hpp"
@@ -139,13 +138,13 @@ void Flow_Sheet_Graph::update_connector_list()
 	{
 		auto con_name = get_unique_connector_name(sim_object, connector_uuid);
 
-		list_widget_holder.emplace_back(std::make_unique<QListWidgetItem>());
-		auto listWidgetItem = list_widget_holder.back().get();
+        list_widget_holder.emplace_back(new QListWidgetItem());
+        auto listWidgetItem = list_widget_holder.back();
 
 		m_listWidget.addItem(listWidgetItem);
 
-		checkbox_holder.emplace_back(std::make_unique< QCheckBox>());
-		auto checkBox = checkbox_holder.back().get();
+        checkbox_holder.emplace_back(new QCheckBox(this));
+        auto checkBox = checkbox_holder.back();
 
 		checkBox->setChecked(not suppress_connectors.contains(connector_uuid));
 		checkBox->setText(con_name.c_str());

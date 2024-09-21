@@ -45,7 +45,7 @@ find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets)
 set(PROJECT_SOURCES
         main.cpp
         mainwindow.cpp
-        #Flow_sheet_graph/Flow_sheet_graph.cpp
+        Flow_sheet_graph/Flow_sheet_graph.cpp
         Unit_Tab/Unit_Tab.cpp
         Generic_cli_tool/Generic_cli_tool_factory.cpp
         Generic_cli_tool/Generic_cli_tool.cpp

@@ -32,8 +32,8 @@ class Flow_Sheet_Graph : public QWidget {
 
 	std::set<std::string>			suppress_connectors; ///< uuids of connectors to be suppressed in graph
 
-	std::vector<std::unique_ptr<QCheckBox>>  checkbox_holder;
-	std::vector<std::unique_ptr<QListWidgetItem>> list_widget_holder;
+    std::vector<QCheckBox*>  checkbox_holder;
+    std::vector<QListWidgetItem*> list_widget_holder;
 private slots:
 	void on_itemClicked(QListWidgetItem* item);
 private:
@@ -42,7 +42,7 @@ private:
 	void update_connector_list();
 
 public:
-	Flow_Sheet_Graph(SimObject_Containers& simobject_container_, const::nlohmann::json& config_) 
+    Flow_Sheet_Graph(SimObject_Containers& simobject_container_, const::nlohmann::json& config_, QWidget * parent)
 		: simobject_container(simobject_container_), config(config_)
 	{
 		layout.addWidget(&graph_imageviewer);

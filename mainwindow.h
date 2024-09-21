@@ -55,7 +55,7 @@ class MainWindow : public QMainWindow
         * sim_object_selector_layout_group[NSimObjects],
         * connector_form_layout_;
 
-    QVBoxLayout    * main_window_horizontal_split,
+QVBoxLayout    * main_window_horizontal_split,
         * sim_object_selector_layout,
         * connector_form_values_layout,
         * unit_form_layout;
@@ -66,11 +66,11 @@ class MainWindow : public QMainWindow
 #ifdef BUILD_WITH_EXPERIMENTAL_WEB_API
     Eval_functional_model_net * eval_functional_model_net_tab;
 #endif
-    //Flow_Sheet_Graph      flow_sheet_graph_tab;
+    Flow_Sheet_Graph    * flow_sheet_graph_tab;
     Unit_Tab       * unit_tab;
     QListWidget    * StreamListSelector;
     QTableView     * connector_value_table;
-    Main_Tab       * main_tab;
+    QTabWidget     * main_tab;
 
 	SimObject_Containers   sim_objects;
 
