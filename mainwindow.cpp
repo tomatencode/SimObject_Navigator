@@ -45,13 +45,22 @@ MainWindow::MainWindow(QWidget* parent)	:
     main_window_horizontal_split->addWidget(eval_functional_model);
     main_window_horizontal_split->addWidget(main_tab);
 
+    main_tab = new Main_Tab();
+
     main_tab->setFocusPolicy(Qt::NoFocus);
+
+    main_window_horizontal_split = new QVBoxLayout();
+    main_window_group = new QGroupBox();
 
     main_window_group->setLayout(main_window_horizontal_split);
 
 	for (int i = 0; i < NSimObjects; ++i)
 	{
+        select_new_simobject[i] = new QPushButton();
         select_new_simobject[i]->setText(("Select SimObject #"s + std::to_string(1 + i)).c_str());
+        sim_object_selector_subgroup[i] = new QGroupBox();
+        sim_object_selector_layout_group[i] = new QHBoxLayout();
+
         sim_object_selector_subgroup[i]->setLayout(sim_object_selector_layout_group[i]);
 
 		//sim_object_selector_layout.addWidget(&drop_label);
@@ -60,8 +69,12 @@ MainWindow::MainWindow(QWidget* parent)	:
 
         sim_object_selector_layout_group[i]->addWidget(select_new_simobject[i]);
 
+        simobj_fname[i] = new QLabel();
+
         sim_object_selector_layout_group[i]->addWidget(simobj_fname[i]);
 
+        sim_object_selector_subgroup[i] = new QGroupBox();
+        sim_object_selector_layout = new QVBoxLayout();
         sim_object_selector_layout->addWidget(sim_object_selector_subgroup[i]);
 	}
     sim_object_selector_group->setLayout(sim_object_selector_layout);
@@ -71,11 +84,21 @@ MainWindow::MainWindow(QWidget* parent)	:
 	// "Streams" Tab
 
 	// Stream Selector is simple list
+    connector_form_layout_ = new QHBoxLayout();
+    StreamListSelector = new QListWidget();
     connector_form_layout_->addWidget(StreamListSelector, 5);
+
+    Connector_form_group = new QGroupBox();
+
     Connector_form_group->setSizePolicy(QSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding));
 
-	// Connector tab is more complex
+    connector_form_values = new QGroupBox();
+    connector_form_layout_ = new QHBoxLayout();
+	// Connector tab is more complex    
     connector_form_layout_->addWidget(connector_form_values);
+
+    connector_form_values_layout = new QVBoxLayout();
+
     connector_form_values_layout->addWidget(copyAction);
 
     Connector_form_group->setLayout(connector_form_layout_);
