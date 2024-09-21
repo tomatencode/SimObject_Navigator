@@ -41,18 +41,20 @@ MainWindow::MainWindow(QWidget* parent)	:
     main_tab = new QTabWidget(this);
     main_window_group = new QGroupBox(this);
     main_window_horizontal_split = new QVBoxLayout(this);
-    sim_object_selector_group = new QGroupBox(main_window_group);
     eval_functional_model = new QPushButton(main_window_group);
+
+    sim_object_selector_group = new QGroupBox(main_window_group);
+
     main_window_horizontal_split->addWidget(sim_object_selector_group);
     main_window_horizontal_split->addWidget(eval_functional_model);
     main_window_horizontal_split->addWidget(main_tab);
 
     main_tab->setFocusPolicy(Qt::NoFocus);
-
-
     main_window_group->setLayout(main_window_horizontal_split);
 
-	for (int i = 0; i < NSimObjects; ++i)
+
+    sim_object_selector_layout = new QVBoxLayout(sim_object_selector_group);
+    for (int i = 0; i < NSimObjects; ++i)
 	{
         sim_object_selector_subgroup[i] = new QGroupBox(sim_object_selector_group);
 
@@ -72,7 +74,6 @@ MainWindow::MainWindow(QWidget* parent)	:
         simobj_fname[i] = new QLabel(sim_object_selector_subgroup[i]);
 
         sim_object_selector_layout_group[i]->addWidget(simobj_fname[i]);
-        sim_object_selector_layout = new QVBoxLayout(sim_object_selector_group);
         sim_object_selector_layout->addWidget(sim_object_selector_subgroup[i]);
 	}
     sim_object_selector_group->setLayout(sim_object_selector_layout);
