@@ -2,20 +2,18 @@
 #include "Flow_sheet_graph/Flow_sheet_graph.hpp"
 
 class Main_Tab : public QTabWidget {
-    //Flow_Sheet_Graph& flow_sheet_graph;
 public:
-    /*
-    Main_Tab(/*Flow_Sheet_Graph& flow_sheet_graph_) : flow_sheet_graph(flow_sheet_graph_) {
-        //connect(this, &QTabWidget::currentChanged, this, &Main_Tab::onTabActivated);
+    Flow_Sheet_Graph * flow_sheet_graph = nullptr;
+    
+    Main_Tab(QWidget * parent) : QTabWidget(parent) {
+        bool success = connect(this, &QTabWidget::currentChanged, this, &Main_Tab::onTabActivated);
+        assert(success);
     }
-    */
-    /*
 private slots:
   void onTabActivated(int index) {
-    if (index == 3) /// \todo use label rather than index
+    if (index == 2) /// \todo use label rather than index
     {
-        //flow_sheet_graph.exec();
+        flow_sheet_graph->exec();
     }
   }
-  */
 };

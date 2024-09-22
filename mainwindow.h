@@ -70,7 +70,7 @@ QVBoxLayout    * main_window_horizontal_split,
     Unit_Tab       * unit_tab;
     QListWidget    * StreamListSelector;
     QTableView     * connector_value_table;
-    QTabWidget     * main_tab;
+    Main_Tab       * main_tab;
 
 	SimObject_Containers   sim_objects;
 

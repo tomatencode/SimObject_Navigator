@@ -28,7 +28,13 @@ class Flow_Sheet_Graph : public QWidget {
 	const::nlohmann::json&			config;
 	Graph_ImageViewer				graph_imageviewer;
 
-	std::string						dot_graph_tool_pathname = R"x(\\le.grp\dept\ITP_Public\SMILE\Tools\Graphviz2.38\bin\dot.exe)x";
+    std::string						dot_graph_tool_pathname =
+#ifdef _WIN32
+        R"x(\\le.grp\dept\ITP_Public\SMILE\Tools\Graphviz2.38\bin\dot.exe)x"
+#else
+        "dot"
+#endif
+        ;
 
 	std::set<std::string>			suppress_connectors; ///< uuids of connectors to be suppressed in graph
 
@@ -39,11 +45,12 @@ private slots:
 private:
 	QListWidget m_listWidget;  
 
-	void update_connector_list();
+    bool first_call = true;
+    void update_connector_list();
 
 public:
     Flow_Sheet_Graph(SimObject_Containers& simobject_container_, const::nlohmann::json& config_, QWidget * parent)
-		: simobject_container(simobject_container_), config(config_)
+        : simobject_container(simobject_container_), config(config_), QWidget(parent)
 	{
 		layout.addWidget(&graph_imageviewer);
 		layout.addWidget(&m_listWidget);

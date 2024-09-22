@@ -16,12 +16,11 @@
  */
 using namespace std::literals::string_literals; // allow suffix ""s for std::string literal
 
-MainWindow::MainWindow(QWidget* parent)	: 
+MainWindow::MainWindow(QWidget* parent)	:
 	QMainWindow(parent),
-    copyAction(),
+    copyAction(new QPushButton(this)),
     not_yet_implemented(),
     unit_tab(new Unit_Tab(sim_objects)),
-    main_tab(),
     cvtm(sim_objects)
 {
 	read_config_file();
@@ -38,7 +37,9 @@ MainWindow::MainWindow(QWidget* parent)	:
 	 */
 
 
-    main_tab = new QTabWidget(this);
+    //main_tab = new QTabWidget(this);
+    main_tab = new Main_Tab(this);
+
     main_window_group = new QGroupBox(this);
     main_window_horizontal_split = new QVBoxLayout(this);
     eval_functional_model = new QPushButton(main_window_group);
@@ -47,9 +48,7 @@ MainWindow::MainWindow(QWidget* parent)	:
 
     main_window_horizontal_split->addWidget(sim_object_selector_group);
     main_window_horizontal_split->addWidget(eval_functional_model);
-    main_window_horizontal_split->addWidget(main_tab);
 
-    main_tab->setFocusPolicy(Qt::NoFocus);
     main_window_group->setLayout(main_window_horizontal_split);
 
 
@@ -96,7 +95,7 @@ MainWindow::MainWindow(QWidget* parent)	:
     connector_form_layout_->addWidget(connector_form_values);
 
     connector_form_values_layout = new QVBoxLayout(connector_form_values);
-    copyAction = new QPushButton(connector_form_values);
+    //copyAction = new QPushButton(connector_form_values);
     copyAction->setText("copy");
     connector_form_values_layout->addWidget(copyAction);
 
@@ -136,9 +135,14 @@ MainWindow::MainWindow(QWidget* parent)	:
 
     flow_sheet_graph_tab = new Flow_Sheet_Graph(sim_objects, configuration, main_tab);
 
+    main_tab->flow_sheet_graph = flow_sheet_graph_tab ;
+
+    main_tab->setFocusPolicy(Qt::NoFocus);
+
     main_tab->addTab(Connector_form_group, "Streams");
     main_tab->addTab(unit_form, "Units");
     main_tab->addTab(flow_sheet_graph_tab, "Graph");
+    main_window_horizontal_split->addWidget(main_tab);
 
 	generic_cli_tool_factory();
 

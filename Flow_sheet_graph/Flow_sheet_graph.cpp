@@ -23,11 +23,13 @@ void Flow_Sheet_Graph::exec()
 
 	update_connector_list();
 
-	char dot_input_fname[2048], dot_output[2048], image_file[2048];
+    char dot_input_fname[2048], dot_output[2048], image_file[2048]; /// \todo replace by std::filesystem operations
 	std::tmpnam(dot_input_fname);
 	//std::strcpy(dot_input_fname, R"x(C:\Users\TTV032\AppData\Local\Temp\my_graph.txt)x"); /// \todo remove later
 	std::tmpnam(dot_output);
 	std::tmpnam(image_file);
+    //strcat(image_file, ".png"); /// \todo this is obviously not a valid temp file, just for testing...
+
 	//std::strcpy(image_file, R"x(C:\Users\TTV032\AppData\Local\Temp\my_graph.png)x"); /// \todo remove later
 
 	{
@@ -44,7 +46,7 @@ void Flow_Sheet_Graph::exec()
 	}
 
 	QImage image;
-	if (not image.load(image_file)) {
+    if (not image.load(image_file)) {
 		message("Failed to load image %s"s + qPrintable(image_file));
 		return;
 	}
@@ -129,31 +131,52 @@ void Flow_Sheet_Graph::update_connector_list()
 	if (simobject_container.empty()) return;
 
 	const auto& sim_object = simobject_container.at(0).sim_object;
+    if(first_call)
+    {
+        checkbox_holder.resize(0);
+        remove_all_entries_QListWidget(m_listWidget);
 
-	checkbox_holder.resize(0);
-	remove_all_entries_QListWidget(m_listWidget);
+        int i = 0;
+        for (const auto& [connector_uuid, connector] : sim_object.at("Connectors").get<nlohmann::json::object_t>())
+        {
+            auto con_name = get_unique_connector_name(sim_object, connector_uuid);
 
-	int i = 0;
-	for (const auto& [connector_uuid, connector] : sim_object.at("Connectors").get<nlohmann::json::object_t>())
-	{
-		auto con_name = get_unique_connector_name(sim_object, connector_uuid);
+            list_widget_holder.emplace_back(new QListWidgetItem());
+            auto listWidgetItem = list_widget_holder.back();
 
-        list_widget_holder.emplace_back(new QListWidgetItem());
-        auto listWidgetItem = list_widget_holder.back();
+            m_listWidget.addItem(listWidgetItem);
 
-		m_listWidget.addItem(listWidgetItem);
+            checkbox_holder.emplace_back(new QCheckBox(this));
+            auto checkBox = checkbox_holder.back();
 
-        checkbox_holder.emplace_back(new QCheckBox(this));
-        auto checkBox = checkbox_holder.back();
+            checkBox->setChecked(not suppress_connectors.contains(connector_uuid));
+            checkBox->setText(con_name.c_str());
+            connect(checkBox, &QCheckBox::clicked, [&]() { on_itemClicked(listWidgetItem); });
 
-		checkBox->setChecked(not suppress_connectors.contains(connector_uuid));
-		checkBox->setText(con_name.c_str());
-		connect(checkBox, &QCheckBox::clicked, [=]() { on_itemClicked(listWidgetItem); });
+            m_listWidget.setItemWidget(listWidgetItem, checkBox);
 
-		m_listWidget.setItemWidget(listWidgetItem, checkBox);
+            i++;
 
-		i++;
-	}
+        }
+        first_call = false;
+    }
+    else
+    {
+        int i = 0;
+
+        for (const auto& [connector_uuid, connector] : sim_object.at("Connectors").get<nlohmann::json::object_t>())
+        {
+            auto con_name = get_unique_connector_name(sim_object, connector_uuid);
+
+            auto checkBox = checkbox_holder.at(i);
+
+            assert(checkBox->text() ==con_name.c_str());
+            checkBox->setChecked(not suppress_connectors.contains(connector_uuid));
+
+            i++;
+        }
+
+    }
 }
 
 void Flow_Sheet_Graph::on_itemClicked(QListWidgetItem* item) {
