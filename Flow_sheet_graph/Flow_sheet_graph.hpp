@@ -23,10 +23,10 @@
 */
 class Flow_Sheet_Graph : public QWidget {
 	Q_OBJECT
-	QHBoxLayout						layout;
+    QHBoxLayout						* layout = nullptr;
 	const SimObject_Containers&		simobject_container;
 	const::nlohmann::json&			config;
-	Graph_ImageViewer				graph_imageviewer;
+    Graph_ImageViewer            * graph_imageviewer = nullptr;
 
     std::string						dot_graph_tool_pathname =
 #ifdef _WIN32
@@ -43,20 +43,24 @@ class Flow_Sheet_Graph : public QWidget {
 private slots:
 	void on_itemClicked(QListWidgetItem* item);
 private:
-	QListWidget m_listWidget;  
+    QListWidget             * m_listWidget = nullptr;
 
     bool first_call = true;
     void update_connector_list();
 
 public:
     Flow_Sheet_Graph(SimObject_Containers& simobject_container_, const::nlohmann::json& config_, QWidget * parent)
-        : simobject_container(simobject_container_), config(config_), QWidget(parent)
+        : simobject_container(simobject_container_), config(config_),
+        QWidget(parent), m_listWidget(new QListWidget),
+        graph_imageviewer(new Graph_ImageViewer),
+        layout(new QHBoxLayout)
 	{
-		layout.addWidget(&graph_imageviewer);
-		layout.addWidget(&m_listWidget);
-		m_listWidget.setSizePolicy(QSizePolicy(QSizePolicy::Fixed, QSizePolicy::MinimumExpanding));
+        layout->addWidget(graph_imageviewer);
 
-		setLayout(&layout);
+        layout->addWidget(m_listWidget);
+        m_listWidget->setSizePolicy(QSizePolicy(QSizePolicy::Fixed, QSizePolicy::MinimumExpanding));
+
+        setLayout(layout);
 
 		update_connector_list();
 	}

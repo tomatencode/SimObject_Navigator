@@ -50,7 +50,7 @@ void Flow_Sheet_Graph::exec()
 		message("Failed to load image %s"s + qPrintable(image_file));
 		return;
 	}
-	graph_imageviewer.setImage(image);
+    graph_imageviewer->setImage(image);
 }
 
 void SimObject_to_dot_input(const nlohmann::json& sim_object, std::ostream& dot_input, const std::set<std::string>& suppress_connectors)
@@ -134,27 +134,26 @@ void Flow_Sheet_Graph::update_connector_list()
     if(first_call)
     {
         checkbox_holder.resize(0);
-        remove_all_entries_QListWidget(m_listWidget);
+        remove_all_entries_QListWidget(*m_listWidget);
 
         int i = 0;
         for (const auto& [connector_uuid, connector] : sim_object.at("Connectors").get<nlohmann::json::object_t>())
         {
             auto con_name = get_unique_connector_name(sim_object, connector_uuid);
 
-            list_widget_holder.emplace_back(new QListWidgetItem());
-            auto listWidgetItem = list_widget_holder.back();
+            list_widget_holder.push_back(new QListWidgetItem());
+            QListWidgetItem* listWidgetItem = list_widget_holder.back();
 
-            m_listWidget.addItem(listWidgetItem);
+            m_listWidget->addItem(listWidgetItem);
 
-            checkbox_holder.emplace_back(new QCheckBox(this));
-            auto checkBox = checkbox_holder.back();
+            checkbox_holder.push_back(new QCheckBox(this));
+            QCheckBox * checkBox = checkbox_holder.back();
 
             checkBox->setChecked(not suppress_connectors.contains(connector_uuid));
             checkBox->setText(con_name.c_str());
-            connect(checkBox, &QCheckBox::clicked, [&]() { on_itemClicked(listWidgetItem); });
+            connect(checkBox, &QCheckBox::clicked, [this,listWidgetItem]() { on_itemClicked(listWidgetItem); });
 
-            m_listWidget.setItemWidget(listWidgetItem, checkBox);
-
+            m_listWidget->setItemWidget(listWidgetItem, checkBox);
             i++;
 
         }
@@ -180,8 +179,9 @@ void Flow_Sheet_Graph::update_connector_list()
 }
 
 void Flow_Sheet_Graph::on_itemClicked(QListWidgetItem* item) {
-	QWidget* widget = m_listWidget.itemWidget(item);
-	const QCheckBox& checkBox = *qobject_cast<QCheckBox*>(widget);
+    QWidget* widget = m_listWidget->itemWidget(item);
+    assert(widget != nullptr);
+    const QCheckBox& checkBox = *qobject_cast<QCheckBox*>(widget);
 
 	auto con_name = checkBox.text().toStdString();
 	const auto& sim_object = simobject_container.at(0).sim_object;
